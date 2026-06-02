@@ -30,6 +30,11 @@ function run(ctx) {
     return;
   }
 
+  // cordova-ios 8.0.0 uses fixed project name 'App'
+  if (oldProjectName === 'App') {
+    return;
+  }
+
   console.log('Project name has changed. Renaming .entitlements file.');
 
   // if it does - rename it
