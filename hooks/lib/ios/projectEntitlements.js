@@ -10,12 +10,10 @@ var path = require('path');
 var fs = require('fs');
 var plist = require('plist');
 var mkpath = require('mkpath');
-var ConfigXmlHelper = require('../configXmlHelper.js');
 var ASSOCIATED_DOMAINS = 'com.apple.developer.associated-domains';
 var context;
-var projectRoot;
-var projectName;
 var entitlementsFilePath;
+var iosProject;
 
 module.exports = {
   generateAssociatedDomainsEntitlements: generateEntitlements
@@ -142,7 +140,9 @@ function domainsListEntryForHost(host) {
  */
 function pathToEntitlementsFile() {
   if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements');
+    var xcodeCordovaProj = getIosProject().locations.xcodeCordovaProj;
+    var projectDirName = path.basename(xcodeCordovaProj);
+    entitlementsFilePath = path.join(xcodeCordovaProj, 'Resources', projectDirName + '.entitlements');
   }
 
   return entitlementsFilePath;
@@ -153,22 +153,14 @@ function pathToEntitlementsFile() {
  *
  * @return {String} absolute path to the projects root
  */
-function getProjectRoot() {
-  return context.opts.projectRoot;
-}
-
-/**
- * Name of the project from config.xml
- *
- * @return {String} project name
- */
-function getProjectName() {
-  if (projectName === undefined) {
-    var configXmlHelper = new ConfigXmlHelper(context);
-    projectName = configXmlHelper.getProjectName();
+function getIosProject() {
+  if (!iosProject) {
+    var cordovaIos = require('cordova-ios');
+    var platformPath = path.join(context.opts.projectRoot, 'platforms', 'ios');
+    iosProject = new cordovaIos('ios', platformPath);
   }
 
-  return projectName;
+  return iosProject;
 }
 
 // endregion
